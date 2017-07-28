@@ -1,0 +1,51 @@
+<?php
+    require_once $_SERVER['DOCUMENT_ROOT'].'/path.php';
+    require_once $_PATH.'/inc/database.php';
+    
+    
+    
+    class ProductModel extends Database{
+        
+        public function show($id){
+            $sql="select * from models where productid='$id'";
+            $result = $this->conn->query($sql);
+            $total=0;
+        if ($result->num_rows > 0) {
+                while($row=$result->fetch_assoc()){
+                    echo "<tr><td>".$row['name']."</td><td>".$row['price']."</td><td>".$row['stock']."</td><td><a href='/receive.php?id={$row['productid']}'>Receive</a></td><td><a href='./deliver.php?id={$row['productid']}'>Delivery</a></td></tr>";
+                    $total+=$row['stock'];
+                }
+            } else {
+                echo "No products to show</br>";
+                
+            }
+            //echo $total;
+            $this->conn->close();
+        }
+        
+    public function showProduct(){
+        $sql="select * from products";
+        $result = $this->conn->query($sql);
+        if ($result->num_rows > 0) {
+                while($row=$result->fetch_assoc()){
+                    echo "<option value={$row['productid']}>".$row['name']."</option>";
+                }
+            } else {
+                echo "No products to show</br>";
+                
+            }
+            $this->conn->close();
+    }
+    
+    public function create($data=array()){
+        $sql="INSERT INTO `models`(`name`, `modelid`, `productid`, `price`, `stock`) VALUES ('$data[0]','$data[1]','$data[2]','$data[3]','$data[4]')";
+        if ($this->conn->query($sql) === TRUE) {
+                echo "model added successfully";
+            } else {
+                echo "Error: ".$this->conn->error;
+            }
+            $this->conn->close(); 
+            }
+    }
+?>
+

@@ -1,0 +1,32 @@
+<?php
+    require_once $_SERVER['DOCUMENT_ROOT'].'/path.php';
+    require_once $_PATH.'/inc/database.php';
+    
+    
+    class Production extends Database{
+        
+        public function show(){
+            $sql="select * from production";
+            $result=$this->conn->query($sql);
+            if ($result->num_rows > 0) {
+                while($row=$result->fetch_assoc()){
+                    echo "<tr><td>{$row['production_id']}</td><td>{$row['date']}</td></tr>";
+                }
+            } else {
+                echo "No productions to show</br>";
+                
+            }
+        }
+        
+        public function addproduction($data){
+            $sql="INSERT INTO `production`(`production_id`) VALUES ($data)";
+            if ($this->conn->query($sql) === TRUE) {
+                header("Location:./");
+            } else {
+                echo "Error: ".$this->conn->error;
+            }
+            $this->conn->close(); 
+        }
+    }
+?>
+

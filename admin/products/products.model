@@ -1,0 +1,33 @@
+<?php
+require_once $_SERVER['DOCUMENT_ROOT'].'/path.php';
+require_once $_PATH.'/inc/database.php';
+
+
+class Product extends Database{
+    public function show(){
+        $sql="select * from products";
+        $result = $this->conn->query($sql);
+        if ($result->num_rows > 0) {
+                while($row=$result->fetch_assoc()){
+                    echo "<ul><li><a href='./productmodel/index.php?name={$row['name']}&id={$row['productid']}'>".$row['name']."</a></li></ul>";
+                }
+            } else {
+                echo "No products to show</br>";
+                
+            }
+            $this->conn->close();
+    }
+    
+    
+    public function create($data=array()){
+        $sql="INSERT INTO `products`(`name`, `productid`) VALUES ('$data[0]','$data[1]')";
+        if ($this->conn->query($sql) === TRUE) {
+                header("Location:./");
+            } else {
+                echo "Error: ".$this->conn->error;
+            }
+            $this->conn->close(); 
+    }
+}
+
+?>

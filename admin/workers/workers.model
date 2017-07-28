@@ -1,0 +1,155 @@
+<?php 
+
+require_once $_SERVER['DOCUMENT_ROOT'].'/path.php';
+require_once $_PATH.'/inc/database.php';
+
+class Worker extends Database{
+    
+    public function show(){
+        $sql="select * from workers";
+        $result = $this->conn->query($sql);
+        if ($result->num_rows > 0) {
+                while($row=$result->fetch_assoc()){
+                    echo "<ul><li><a href='single.php?id={$row['wid']}'>".$row['name']."</a></li></ul>";
+                }
+            } else {
+                echo "No workers to show</br>";
+                
+            }
+            $this->conn->close();
+    }
+    
+    public function create($data=array()){
+        
+       $sql="INSERT INTO `workers`(`name`, `wid`, `mobile`, `address`, `joiningdate`) VALUES ('$data[0]','$data[1]',$data[2],'$data[3]','$data[4]')";
+       if ($this->conn->query($sql) === TRUE) {
+                echo "product added successfully";
+            } else {
+                echo "Error: ".$this->conn->error;
+            }
+            $this->conn->close(); 
+    }
+    
+    public function single($id){
+        $sql="select * from workers where wid='$id'";
+        $name="";
+        $result = $this->conn->query($sql);
+        if ($result->num_rows > 0) {
+                while($row=$result->fetch_assoc()){
+                    echo "<h3>Name :{$row['name']}</h3>";
+                    echo "<h3>Mobile no :{$row['mobile']}</h3>";
+                    echo "<h3>Address :{$row['address']}</h3>";
+                    echo "<h3>joining date :{$row['joiningdate']}</h3>";
+                    $name=$row['name'];
+                }
+            } else {
+                echo "No workers to show</br>";
+                
+            }
+        echo "<a href='./addworkinghistory.php?id={$id}&name={$name}'>Add working history</a>";    
+        echo "<h1>Working history</h1>";   
+            $this->conn->close();
+    }
+    
+    public function showProductList(){
+        $sql="select * from products";
+        $result = $this->conn->query($sql);
+        if ($result->num_rows > 0) {
+                while($row=$result->fetch_assoc()){
+                    echo "<option value={$row['productid']}>".$row['name']."</option>";
+                }
+            } else {
+                echo "No workers to show</br>";
+                
+            }
+            $this->conn->close();
+    }
+    
+    public function showProductModel($id){
+        $sql="select * from models where productid='$id'";
+        $result = $this->conn->query($sql);
+        if ($result->num_rows > 0) {
+                while($row=$result->fetch_assoc()){
+                    echo "<option value={$row['modelid']}>".$row['name']."</option>";
+                }
+            } else {
+                echo "No workers to show</br>";
+                
+            }
+            $this->conn->close();
+    }
+    
+    public function addWorkingHistory($data=array()){
+        
+        $net=$data[3]-$data[4];
+        $total_weight=$net*$data[5];
+        $rate=($net*100)/$data[3];
+        $sql="INSERT INTO `productionhistory`( `worker_id`, `product_id`, `model_id`, `gross_product`, `reject_product`, `net_product`, `average_weight`, `total_weight`, `production_rate`, `production_id`) VALUES ('$data[0]','$data[1]','$data[2]','$data[3]','$data[4]','$net','$data[5]','$total_weight','$rate','$data[6]')";
+        if ($this->conn->query($sql) === TRUE) {
+                header("Location:./");
+            } else {
+                echo "Error: ".$this->conn->error;
+            }
+            $this->conn->close(); 
+    }
+    
+    public function singleWorking($id,$worker_id){
+        $sql="select * from productionhistory where worker_id='$worker_id' and production_id=$id";
+        $result = $this->conn->query($sql);
+        if ($result->num_rows > 0) {
+            echo "<tr><th>Product name</th><th>Model name</th><th>Gross product</th><th>Reject Product</th><th>Net Product</th><th>Average weight</th><th>Total weight</th><th>production rate</th><th>production No</th></tr>";
+            
+                while($row=$result->fetch_assoc()){
+                    
+                    echo "<tr><td>{$this->productname($row['product_id'])}</td><td>{$this->modelname($row['model_id'])}</td><td>{$row['gross_product']}</td><td>{$row['reject_product']}</td><td>{$row['net_product']}</td><td>{$row['average_weight']}</td><td>{$row['total_weight']}</td><td>{$row['production_rate']}</td><td>{$row['production_id']}</td></tr>";
+                   
+                }
+            } else {
+                echo "No working history to show</br>";
+                
+            }
+            //echo $total;
+            $this->conn->close();
+    }
+    public function showHistory($id){
+        //$sql="SELECT productionhistory.gross_product, productionhistory.reject_product,products.name  , models.modelid FROM productionhistory  INNER JOIN products ON productionhistory.product_id=products.productid  INNER JOIN models ON productionhistory.model_id=models.modelid  productionhistory.worker_id='$id'";
+        $sql="select * from productionhistory where worker_id='$id'";
+        $result = $this->conn->query($sql);
+        if ($result->num_rows > 0) {
+                while($row=$result->fetch_assoc()){
+                    
+                    echo "<li><a href='./singleinfo.php?id={$row['production_id']}&u={$id}'>{$row['production_id']}</a></li>";
+                   
+                }
+            } else {
+                echo "No working history to show</br>";
+                
+            }
+            //echo $total;
+            $this->conn->close();
+    }
+    
+    private function productname($id){
+        $sql="select * from products where productid='$id'";
+        $result = $this->conn->query($sql);
+        if($result->num_rows > 0){
+            $row=$result->fetch_assoc();
+            return $row['name'];
+        }
+        
+    }
+    
+    private function modelname($id){
+        $sql="select * from models where modelid='$id'";
+        $result = $this->conn->query($sql);
+        if($result->num_rows > 0){
+            $row=$result->fetch_assoc();
+            return $row['name'];
+        }
+        
+    }
+}
+
+
+?>
+
